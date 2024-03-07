@@ -28,6 +28,7 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         if ((millis() - sDeviceConnected[i].lLastTime) > 3000) {
             u_bike[i].components.sBasic.u8Connected = 0x00;
             sDeviceConnected[i].lLastTime = millis();
+            CHC_PL_LOG_I("Device %d disconnected", i);
         }
     }
     // ----------------- 以下為接收資料 -----------------
@@ -129,7 +130,12 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         u_bike[EC_BATTERY2].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_BATTERY2].lLastTime = millis();
         break;
-
+    case CHC_PROTOCOL_HYENA2::ChargerModuleIDBroadcasting: // 0x12000
+    case CHC_PROTOCOL_HYENA2::ChargerModuleIDBroadcastingRequest: // 0x12000
+    case CHC_PROTOCOL_HYENA2::ChargerErrorInfo:
+        u_bike[EC_CHARGER].components.sBasic.u8Connected = 0x01;
+        sDeviceConnected[EC_CHARGER].lLastTime = millis();
+        break;
     default:
         break;
     }
@@ -164,6 +170,16 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #endif
         break;
 #endif
+    case CHC_PROTOCOL_HYENA2::BikeControl00: // 0x300
+#ifdef CAN_lib_2
+        u_bike[EC_CONTROLLER].components.sController.assistLevel = rx_msg.data.u8[0];
+        Serial.println(u_bike[EC_CONTROLLER].components.sController.assistLevel);
+        // u_bike[EC_CONTROLLER].components.sController.assistLevel = (rx_msg.data.u8[4] >> 7) & 0x01;
+#else
+        u_bike[EC_CONTROLLER].components.sController.assistLevel = rx_msg.data[0];
+#endif
+
+        break;
 // ----------------------------------------------------------------
 // Derailleur ID --------------------------------
 #ifdef rx_derailleurModuleIDBroadcasting
@@ -182,16 +198,10 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
     case CHC_PROTOCOL_HYENA2::DerailleurState: // 0x650
 #ifdef CAN_lib_2
         u_bike[EC_DERAILLEUR].components.sDerailleur.gearIndex = rx_msg.data.u8[0];
-        // u_bike_info.components.sDerailleur.uInfo.contents.errorCode = rx_msg.data.u8[1];
         u_bike[EC_DERAILLEUR].components.sDerailleur.u16ErrorCode = (uint16_t)rx_msg.data.u8[1];
-        // u_bike[EC_DERAILLEUR].components.sDerailleur.u16ErrorCode = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
 #else
-                                               // u_bike_info.contents.s_derailleur_info.gearIndex = rx_msg.data[0];
-        // u_bike_info.contents.s_derailleur_info.u_derailleur_basic_info.contents.errorCode = rx_msg.data[1];
-
         u_bike[EC_DERAILLEUR].components.sDerailleur.gearIndex = rx_msg.data[0];
         u_bike[EC_DERAILLEUR].components.sDerailleur.u16ErrorCode = (uint16_t)rx_msg.data[1];
-        // u_bike[EC_DERAILLEUR].components.sDerailleur.u16ErrorCode = (uint16_t)rx_msg.data[0] | rx_msg.data[1] << 8;
 #endif
         break;
 #endif
@@ -251,12 +261,12 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         u_bike[EC_CONTROLLER].components.sController.bikeSpeed = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
         u_bike[EC_CONTROLLER].components.sController.torque = (uint16_t)rx_msg.data.u8[2] | rx_msg.data.u8[3] << 8;
         u_bike[EC_CONTROLLER].components.sController.lightStatus = (rx_msg.data.u8[4] >> 1) & 0x01;
-        u_bike[EC_CONTROLLER].components.sController.assistLevel = (rx_msg.data.u8[4] >> 7) & 0x01;
+        // u_bike[EC_CONTROLLER].components.sController.assistLevel = (rx_msg.data.u8[4] >> 7) & 0x01;
 #else
         u_bike[EC_CONTROLLER].components.sController.bikeSpeed = (uint16_t)rx_msg.data[0] | rx_msg.data[1] << 8;
         u_bike[EC_CONTROLLER].components.sController.torque = (uint16_t)rx_msg.data[2] | rx_msg.data[3] << 8;
         u_bike[EC_CONTROLLER].components.sController.lightStatus = (rx_msg.data[4] >> 1) & 0x01;
-        u_bike[EC_CONTROLLER].components.sController.assistLevel = (rx_msg.data[4] >> 7) & 0x01;
+        // u_bike[EC_CONTROLLER].components.sController.assistLevel = (rx_msg.data[4] >> 7) & 0x01;
 /*
         u_bike_info.contents.s_controller_info.bikeSpeed = rx_msg.data[0] | rx_msg.data[1] << 8;
         u_bike_info.contents.s_controller_info.torque = rx_msg.data[2] | rx_msg.data[3] << 8;

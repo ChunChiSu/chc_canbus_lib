@@ -64,19 +64,25 @@ bool CAN_base_init(int pinCanRx, int pinCanTx, long baudrate)
 #endif
 #ifdef CAN_lib_2
     static uint8_t canInitialized = 0;
-    if (canInitialized == 1) {
-        ESP32Can.CANStop();
-    }
+    // if (canInitialized == 1) {
+    ESP32Can.CANStop();
+    // }
     // long lBaudrate = 500000;
     switch (baudrate) {
     case 125000:
-        CAN_cfg.speed = CAN_SPEED_125KBPS;
-        break;
-    case 250000:
+        // CAN_cfg.speed = CAN_SPEED_125KBPS;
         CAN_cfg.speed = CAN_SPEED_250KBPS;
         break;
-    case 500000:
+    case 250000:
+        // CAN_cfg.speed = CAN_SPEED_250KBPS;
         CAN_cfg.speed = CAN_SPEED_500KBPS;
+        break;
+    case 500000:
+        // CAN_cfg.speed = CAN_SPEED_500KBPS;
+        CAN_cfg.speed = CAN_SPEED_1000KBPS;
+        break;
+    case 10000000:
+        // CAN_cfg.speed = CAN_SPEED_1000KBPS;
         break;
     default:
         break;

@@ -48,6 +48,7 @@
 #ifdef node_HMI
 #define rx_MCUtoDIAG
 #define rx_MCU_1
+#define rx_MCU_2
 #define rx_MCU_V
 
 #define rx_RRUtoDIAG
@@ -112,6 +113,7 @@
 #define rx_HMI_V
 #define rx_MCUtoDIAG
 #define rx_MCU_1
+#define rx_MCU_2
 #define rx_MCU_V
 #define rx_RRUtoDIAG
 #define rx_RRU_1
@@ -206,12 +208,20 @@ public:
         // MCU ID
         MCU_DIAG = 0x150,
         MCU_ID1 = 0x160,
+        MCU_ID2 = 0x161,
         MCU_V = 0x16F,
+
+        // TPMS ID
+        TPMS_DIAG = 0x170,
+        TPMS_ID1 = 0x180,
+        TPMS_V = 0x18F,
+
         // RRU ID
         RRU_DIAG = 0x190,
         RRU_ID1 = 0x1A0,
         RRU_ID2 = 0x1A1,
         RRU_V = 0x1AF,
+
         // CWS ID
         CWS_DIAG = 0x1B0,
         CWS_ID1 = 0x1C0,
@@ -221,6 +231,7 @@ public:
         NU_ID1 = 0x1E0,
         NU_ID2 = 0x1E1,
         NU_V = 0x1EF
+
     };
 
     typedef struct
@@ -239,6 +250,7 @@ public:
         uint16_t cadence;
         uint16_t speed;
         uint8_t battery;
+        uint8_t u8PowerStatus;
     } S_MCU_DATA;
 
     typedef struct
@@ -283,8 +295,13 @@ public:
         uint8_t assist;
         uint8_t mode;
         uint8_t hr_warning;
+        uint8_t u8PowerKeep;
     } S_HMI_DATA;
-
+    typedef struct {
+        uint8_t tirePressurePsi_rear_left;
+        uint8_t tirePressurePsi_rear_right;
+        uint8_t tirePressurePsi_front;
+    } S_TPMS_DATA;
     typedef struct {
         uint8_t HMI;
         uint8_t MCU;
@@ -300,6 +317,7 @@ public:
         S_CWS_DATA cws;
         S_NU_DATA nu;
         S_HMI_DATA hmi;
+        S_TPMS_DATA tps;
         S_ALL_DTC dtc;
     } S_DATA;
 
@@ -329,6 +347,7 @@ public:
         GET_CWS,
         GET_NU,
         GET_DIAG,
+        GET_TPMS,
     } REQ_type;
 
     // bool init();
@@ -343,7 +362,8 @@ public:
         uint8_t hr_value,
         uint8_t sport_mode,
         uint8_t mode,
-        uint8_t warning);
+        uint8_t warning,
+        uint8_t u8fPowerKeep);
 
     bool MCU_setAssist(uint8_t u8Assist);
 
@@ -358,6 +378,11 @@ public:
         bool setRRU,
         bool setCWS,
         bool setNU);
+
+    bool TPMS_period(
+        uint8_t tirePressurePsi_rear_left,
+        uint8_t tirePressurePsi_rear_right,
+        uint8_t tirePressurePsi_front);
 
     bool RRU_setParam(
         uint16_t distance,
@@ -384,6 +409,7 @@ public:
         uint16_t cadence,
         uint16_t speed,
         uint8_t battery);
+    bool MCU_setPower(uint8_t u8fPowerStatus);
     bool MCU_version(
         uint8_t protocol_major,
         uint8_t protocol_minor,

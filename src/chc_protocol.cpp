@@ -42,6 +42,16 @@ CHC_PROTOCOL::REQ_type CHC_PROTOCOL::rx()
     switch (rx_frame.identifier)
 #endif
     {
+    case CHC_PROTOCOL::TPMS_DIAG:
+        return GET_DIAG;
+        break;
+    case CHC_PROTOCOL::TPMS_ID1:
+        sData.tps.tirePressurePsi_rear_left = rx_frame.data[0];
+        sData.tps.tirePressurePsi_rear_right = rx_frame.data[1];
+        sData.tps.tirePressurePsi_front = rx_frame.data[2];
+        return GET_TPMS;
+        break;
+
         // DIAG ID --------------------------------
 // ----------------------------------------------------------------
 #ifdef rx_DIAGtoHMI
@@ -102,12 +112,14 @@ CHC_PROTOCOL::REQ_type CHC_PROTOCOL::rx()
         sData.hmi.sport_level = rx_frame.data.u8[2];
         sData.hmi.mode = rx_frame.data.u8[3];
         sData.hmi.hr_warning = rx_frame.data.u8[4];
+        sData.hmi.u8PowerKeep = rx_frame.data.u8[5];
 #else
         sData.hmi.hr_status = rx_frame.data[0];
         sData.hmi.hr_value = rx_frame.data[1];
-        sData.hmi.sport_mode = rx_frame.data[2];
+        sData.hmi.sport_level = rx_frame.data[2];
         sData.hmi.mode = rx_frame.data[3];
         sData.hmi.hr_warning = rx_frame.data[4];
+        sData.hmi.u8PowerKeep = rx_frame.data[5];
 #endif
         // return PROCESS_DONE;
         return GET_HMI;
@@ -336,6 +348,17 @@ CHC_PROTOCOL::REQ_type CHC_PROTOCOL::rx()
         return GET_MCU;
         break;
 #endif
+#ifdef rx_MCU_2
+    case CHC_PROTOCOL::MCU_ID2: // = 0x161,
+#ifdef CAN_lib_2
+        sData.mcu.u8PowerStatus = rx_frame.data.u8[0];
+#else
+        sData.mcu.u8PowerStatus = rx_frame.data[0];
+#endif
+        // return PROCESS_DONE;
+        return GET_MCU;
+        break;
+#endif
 // ----------------------------------------------------------------
 #ifdef rx_MCU_V
     case CHC_PROTOCOL::MCU_V: // = 0x16F,
@@ -555,17 +578,34 @@ bool CHC_PROTOCOL::HMI_period(
     uint8_t hr_value,
     uint8_t sport_mode,
     uint8_t mode,
-    uint8_t warning)
+    uint8_t warning,
+    uint8_t u8fPowerKeep)
 {
     tx_frame.identifier = HMI_ID1;
     tx_frame.extd = 0;
     tx_frame.rtr = 0;
-    tx_frame.data_length_code = 5;
+    tx_frame.data_length_code = 6;
     tx_frame.data[0] = hr_status;
     tx_frame.data[1] = hr_value;
     tx_frame.data[2] = sport_mode;
     tx_frame.data[3] = mode;
     tx_frame.data[4] = warning;
+    tx_frame.data[5] = u8fPowerKeep;
+    return CAN_base_transmit(&tx_frame);
+}
+
+bool CHC_PROTOCOL::TPMS_period(
+    uint8_t tirePressurePsi_rear_left,
+    uint8_t tirePressurePsi_rear_right,
+    uint8_t tirePressurePsi_front)
+{
+    tx_frame.identifier = TPMS_ID1;
+    tx_frame.extd = 0;
+    tx_frame.rtr = 0;
+    tx_frame.data_length_code = 3;
+    tx_frame.data[0] = tirePressurePsi_rear_left;
+    tx_frame.data[1] = tirePressurePsi_rear_right;
+    tx_frame.data[2] = tirePressurePsi_front;
     return CAN_base_transmit(&tx_frame);
 }
 
@@ -695,7 +735,16 @@ bool CHC_PROTOCOL::MCUtoDIAG(uint8_t error)
     tx_frame.data[0] = error;
     return CAN_base_transmit(&tx_frame);
 }
-
+// 設定電源狀態
+bool CHC_PROTOCOL::MCU_setPower(uint8_t u8fPowerStatus)
+{
+    tx_frame.identifier = MCU_ID2;
+    tx_frame.extd = 0;
+    tx_frame.rtr = 0;
+    tx_frame.data_length_code = 1;
+    tx_frame.data[0] = u8fPowerStatus;
+    return CAN_base_transmit(&tx_frame);
+}
 // 傳送扭力、踏頻、速度、電量
 bool CHC_PROTOCOL::MCU_period(
     uint8_t assist,

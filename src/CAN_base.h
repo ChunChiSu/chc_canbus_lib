@@ -4,7 +4,7 @@
 #ifdef CAN_lib_2
 #include <ESP32CAN.h>
 #endif
-#define DEBUG_CAN_LEVEL 1 
+#define DEBUG_CAN_LEVEL 0 
 #define DEBUG_CAN_SERIAL Serial
 
 #if DEBUG_CAN_LEVEL >= 1
@@ -57,7 +57,7 @@ typedef struct {
     uint32_t identifier; /**< 11 or 29 bit identifier */
     uint8_t data_length_code; /**< Data length code */
     uint8_t data[8]; /**< Data bytes (not relevant in RTR frame) */
-} CAN_frame_tt;
+} CAN_frame_t;
 extern bool CAN_base_init(int pinCanRx, int pinCanTx, long baudrate = vCANbus_baudrate);
 extern bool CAN_base_transmit(CAN_frame_t* data);
 extern bool CAN_base_receive(CAN_frame_t* data, long timeout_ms);

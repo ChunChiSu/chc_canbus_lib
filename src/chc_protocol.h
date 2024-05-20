@@ -81,6 +81,10 @@
 #ifdef node_RRU
 #define rx_NM_get_INFO
 #define rx_NM_set_CMD
+#define rx_update_rru_FW
+#define rx_read_rru_params
+#define rx write_rru_params
+
 #define rx_HMItoRRU
 #define rx_HMI_V
 
@@ -184,6 +188,7 @@
 class CHC_PROTOCOL {
 public:
     CHC_PROTOCOL();
+    unsigned int cal_crc32(const unsigned char *buf, int len, unsigned int init);
     typedef union {
         float var;
         uint8_t array[4];
@@ -204,7 +209,7 @@ public:
         NM_set_CMD = 0x14C,
         HMItoRRU = 0x14D,
         HMItoCWS = 0x14E,
-        HMI_V = 0x14F,
+        HMI_V = 0x14F,        
         // MCU ID
         MCU_DIAG = 0x150,
         MCU_ID1 = 0x160,
@@ -425,7 +430,8 @@ public:
         uint8_t id,
         uint16_t distance,
         uint16_t speed,
-        uint8_t degree);
+        uint8_t degree,
+        uint8_t status);
     bool RRU_period(
         uint8_t alarm_status_L,
         uint8_t alarm_status_R,

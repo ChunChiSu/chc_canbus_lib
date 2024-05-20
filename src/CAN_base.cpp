@@ -23,12 +23,24 @@ bool CAN_base_init(int pinCanRx, int pinCanTx, long baudrate)
 #ifdef CAN_lib_1
     twai_stop();
     twai_driver_uninstall();
+    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_250KBITS();
     twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(
         (gpio_num_t)pinCanTx,
         (gpio_num_t)pinCanRx,
         TWAI_MODE_NORMAL); // TWAI_MODE_NORMAL, TWAI_MODE_NO_ACK or TWAI_MODE_LISTEN_ONLY
-
-    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
+                           //
+    switch (baudrate) {
+    case 125000:
+        break;
+    case 250000:
+        t_config = TWAI_TIMING_CONFIG_250KBITS();
+        break;
+    case 500000:
+        t_config = TWAI_TIMING_CONFIG_500KBITS();
+        break;
+    default:
+        break;
+    }
     twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
     esp_err_t err = twai_driver_install(&g_config, &t_config, &f_config);
@@ -52,17 +64,26 @@ bool CAN_base_init(int pinCanRx, int pinCanTx, long baudrate)
 
 #endif
 #ifdef CAN_lib_2
+    static uint8_t canInitialized = 0;
+    // if (canInitialized == 1) {
     ESP32Can.CANStop();
+    // }
     // long lBaudrate = 500000;
     switch (baudrate) {
     case 125000:
+        // CAN_cfg.speed = CAN_SPEED_125KBPS;
         CAN_cfg.speed = CAN_SPEED_250KBPS;
         break;
     case 250000:
+        // CAN_cfg.speed = CAN_SPEED_250KBPS;
         CAN_cfg.speed = CAN_SPEED_500KBPS;
         break;
     case 500000:
+        // CAN_cfg.speed = CAN_SPEED_500KBPS;
         CAN_cfg.speed = CAN_SPEED_1000KBPS;
+        break;
+    case 10000000:
+        // CAN_cfg.speed = CAN_SPEED_1000KBPS;
         break;
     default:
         break;
@@ -71,6 +92,7 @@ bool CAN_base_init(int pinCanRx, int pinCanTx, long baudrate)
     CAN_cfg.rx_pin_id = (gpio_num_t)pinCanRx;
     CAN_cfg.rx_queue = xQueueCreate(rx_queue_size, sizeof(CAN_frame_t));
     ESP32Can.CANInit();
+    canInitialized = 1;
     return true;
 #endif
 #ifdef CAN_lib_3

@@ -745,6 +745,16 @@ bool CHC_PROTOCOL::MCU_setPower(uint8_t u8fPowerStatus)
     tx_frame.data[0] = u8fPowerStatus;
     return CAN_base_transmit(&tx_frame);
 }
+// 設定電源狀態
+bool CHC_PROTOCOL::MCU_setPower(uint8_t u8fPowerStatus)
+{
+    tx_frame.identifier = MCU_ID2;
+    tx_frame.extd = 0;
+    tx_frame.rtr = 0;
+    tx_frame.data_length_code = 1;
+    tx_frame.data[0] = u8fPowerStatus;
+    return CAN_base_transmit(&tx_frame);
+}
 // 傳送扭力、踏頻、速度、電量
 bool CHC_PROTOCOL::MCU_period(
     uint8_t assist,
@@ -808,19 +818,21 @@ bool CHC_PROTOCOL::RRU_E(
     uint8_t id,
     uint16_t distance,
     uint16_t speed,
-    uint8_t degree)
+    uint8_t degree,
+    uint8_t status)
 {
-    tx_frame.identifier = RRU_ID1;
-    tx_frame.extd = 0;
-    tx_frame.rtr = 0;
-    tx_frame.data_length_code = 6;
-    tx_frame.data[0] = id;
-    tx_frame.data[1] = distance;
-    tx_frame.data[2] = distance >> 8;
-    tx_frame.data[3] = speed;
-    tx_frame.data[4] = speed >> 8;
-    tx_frame.data[5] = degree;
-    return CAN_base_transmit(&tx_frame);
+    tx_msg.identifier = RRU_INFO;
+    tx_msg.extd = 0;
+    tx_msg.rtr = 0;
+    tx_msg.data_length_code = 6;
+    tx_msg.data[0] = id;
+    tx_msg.data[1] = speed;
+    tx_msg.data[2] = speed >> 8;
+    tx_msg.data[3] = distance;
+    tx_msg.data[4] = distance >> 8;
+    tx_msg.data[5] = degree;
+    tx_msg.data[6] = status;
+    return CAN_base_transmit(&tx_msg);
 }
 
 /* 傳送警戒狀態、燈狀態

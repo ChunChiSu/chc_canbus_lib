@@ -42,6 +42,16 @@ CHC_PROTOCOL::REQ_type CHC_PROTOCOL::rx()
     switch (rx_frame.identifier)
 #endif
     {
+    case CHC_PROTOCOL::TPMS_DIAG:
+        return GET_DIAG;
+        break;
+    case CHC_PROTOCOL::TPMS_ID1:
+        sData.tps.tirePressurePsi_rear_left = rx_frame.data[0];
+        sData.tps.tirePressurePsi_rear_right = rx_frame.data[1];
+        sData.tps.tirePressurePsi_front = rx_frame.data[2];
+        return GET_TPMS;
+        break;
+
         // DIAG ID --------------------------------
 // ----------------------------------------------------------------
 #ifdef rx_DIAGtoHMI
@@ -278,6 +288,11 @@ CHC_PROTOCOL::REQ_type CHC_PROTOCOL::rx()
         // return PROCESS_DONE;
         return GET_HMI;
         break;
+#endif
+#ifdef rx_HMItoLock
+    case CHC_PROTOCOL::HMItoLock:
+        sData.lock.content.LockCMD = rx_frame.data[5];
+        return GET_LOCK_CMD;
 #endif
 // ----------------------------------------------------------------
 #ifdef rx_HMItoCWS
@@ -584,6 +599,21 @@ bool CHC_PROTOCOL::HMI_period(
     return CAN_base_transmit(&tx_frame);
 }
 
+bool CHC_PROTOCOL::TPMS_period(
+    uint8_t tirePressurePsi_rear_left,
+    uint8_t tirePressurePsi_rear_right,
+    uint8_t tirePressurePsi_front)
+{
+    tx_frame.identifier = TPMS_ID1;
+    tx_frame.extd = 0;
+    tx_frame.rtr = 0;
+    tx_frame.data_length_code = 3;
+    tx_frame.data[0] = tirePressurePsi_rear_left;
+    tx_frame.data[1] = tirePressurePsi_rear_right;
+    tx_frame.data[2] = tirePressurePsi_front;
+    return CAN_base_transmit(&tx_frame);
+}
+
 // 設定輔助力
 bool CHC_PROTOCOL::MCU_setAssist(uint8_t u8Assist)
 {
@@ -708,6 +738,16 @@ bool CHC_PROTOCOL::MCUtoDIAG(uint8_t error)
     tx_frame.rtr = 0;
     tx_frame.data_length_code = 1;
     tx_frame.data[0] = error;
+    return CAN_base_transmit(&tx_frame);
+}
+// 設定電源狀態
+bool CHC_PROTOCOL::MCU_setPower(uint8_t u8fPowerStatus)
+{
+    tx_frame.identifier = MCU_ID2;
+    tx_frame.extd = 0;
+    tx_frame.rtr = 0;
+    tx_frame.data_length_code = 1;
+    tx_frame.data[0] = u8fPowerStatus;
     return CAN_base_transmit(&tx_frame);
 }
 // 設定電源狀態
@@ -1007,6 +1047,39 @@ bool CHC_PROTOCOL::NU_version(
     tx_frame.data[3] = sw_minor;
     tx_frame.data[4] = hw_major;
     tx_frame.data[5] = hw_minor;
+#endif
+    return CAN_base_transmit(&tx_frame);
+}
+#endif
+#ifdef node_Lock
+bool CHC_PROTOCOL::Lock_period(uint8_t LockStatus)
+{
+    #ifdef CAN_lib_2
+    tx_frame.MsgID = Lock_ID;
+    tx_frame.FIR.B.FF = CAN_frame_std;
+    tx_frame.FIR.B.RTR = CAN_no_RTR;
+    tx_frame.FIR.B.DLC = 8;
+    tx_frame.data.u8[0] = 0;
+    tx_frame.data.u8[1] = 0;
+    tx_frame.data.u8[2] = 0;
+    tx_frame.data.u8[3] = 0;
+    tx_frame.data.u8[4] = 0;
+    tx_frame.data.u8[5] = LockStatus;
+    tx_frame.data.u8[6] = 0;
+    tx_frame.data.u8[7] = 0;
+#else
+    tx_frame.identifier = Lock_ID;
+    tx_frame.extd = 0;
+    tx_frame.rtr = 0;
+    tx_frame.data_length_code = 8;
+    tx_frame.data[0] = 0;
+    tx_frame.data[1] = 0;
+    tx_frame.data[2] = 0;
+    tx_frame.data[3] = 0;
+    tx_frame.data[4] = 0;
+    tx_frame.data[5] = LockStatus;
+    tx_frame.data[6] = 0;
+    tx_frame.data[7] = 0;
 #endif
     return CAN_base_transmit(&tx_frame);
 }

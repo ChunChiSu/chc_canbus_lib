@@ -423,7 +423,7 @@ public:
         Battery1Info02 = 0x402,
         Battery1Info06 = 0x406,
         // Battery2 ID
-        Battery2ModuleIDBroadcasting = 0x12000,
+        Battery2ModuleIDBroadcasting = 0x13001,
         Battery2ModuleIDBroadcastingRequest = 0x12001,
         Battery2Info00 = 0x450,
         Battery2Info01 = 0x451,
@@ -437,7 +437,7 @@ public:
         eLockInfo = 0x633,
         // Controller ID
         ControllerModuleIDBroadcasting = 0x13000,
-        ControllerModuleIDBroadcastingRequest = 0x13001,
+        ControllerModuleIDBroadcastingRequest = 0x13002,
         ControllerInfo01 = 0x201,
         ControllerInfo02 = 0x202,
         ControllerInfo03 = 0x203,
@@ -451,6 +451,7 @@ public:
 
         // HMI ID
         HMIModuleIDBroadcasting = 0x14000,
+        HMIModuleIDBroadcasting_hyena = 0x14002,
         HMIModuleIDBroadcastingRequest = 0x14001,
 
         HMIErrorInfo = 0x329,

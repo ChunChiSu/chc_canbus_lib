@@ -142,6 +142,9 @@
 #define rx_NUtoDIAG
 #define rx_NU_V
 #endif
+#ifdef node_Lock
+#define rx_HMItoLock
+#endif
 
 // -- verson ..
 
@@ -208,6 +211,7 @@ public:
         NM_get_info = 0x14B,
         NM_set_CMD = 0x14C,
         HMItoRRU = 0x14D,
+        HMItoLock = 0x50D,
         HMItoCWS = 0x14E,
         HMI_V = 0x14F,        
         // MCU ID
@@ -215,6 +219,11 @@ public:
         MCU_ID1 = 0x160,
         MCU_ID2 = 0x161,
         MCU_V = 0x16F,
+        // TPMS ID
+        TPMS_DIAG = 0x170,
+        TPMS_ID1 = 0x180,
+        TPMS_V = 0x18F,
+
         // RRU ID        
         RRU_FW_UPDATE_REQ = 0x190,
         RRU_FW_UPDATE_RP = 0x191,
@@ -239,7 +248,9 @@ public:
         NU_DIAG = 0x1D0,
         NU_ID1 = 0x1E0,
         NU_ID2 = 0x1E1,
-        NU_V = 0x1EF
+        NU_V = 0x1EF,
+        // Lock ID
+        Lock_ID = 0x700
     };
 
     typedef struct
@@ -305,7 +316,29 @@ public:
         uint8_t hr_warning;
         uint8_t u8PowerKeep;
     } S_HMI_DATA;
+    typedef struct {
+        uint8_t tirePressurePsi_rear_left;
+        uint8_t tirePressurePsi_rear_right;
+        uint8_t tirePressurePsi_front;
+    } S_TPMS_DATA;
+    typedef struct {
+        uint8_t bStand:1;
+        uint8_t bLock:1;
+        uint8_t bLockPosition:1;
+        uint8_t bUnlockPosition:1;
+        uint8_t bUnknowCode:1;
+        uint8_t bUnlockTimeout:1;
+        uint8_t bLockSensor:1;
+        uint8_t bUnlockSensor:1;
+        uint8_t LockCMD;
+    }S_LOCK_DATA;
 
+    typedef union 
+    {
+        S_LOCK_DATA content;
+        uint8_t bytes[sizeof(S_LOCK_DATA)];
+    }U_LOCK_DATA;
+    
     typedef struct {
         uint8_t HMI;
         uint8_t MCU;
@@ -321,6 +354,8 @@ public:
         S_CWS_DATA cws;
         S_NU_DATA nu;
         S_HMI_DATA hmi;
+        S_TPMS_DATA tps;
+        U_LOCK_DATA lock;
         S_ALL_DTC dtc;
     } S_DATA;
 
@@ -350,6 +385,9 @@ public:
         GET_CWS,
         GET_NU,
         GET_DIAG,
+        GET_TPMS,
+        GET_LOCK,
+        GET_LOCK_CMD,
     } REQ_type;
 
     // bool init();
@@ -380,6 +418,11 @@ public:
         bool setRRU,
         bool setCWS,
         bool setNU);
+
+    bool TPMS_period(
+        uint8_t tirePressurePsi_rear_left,
+        uint8_t tirePressurePsi_rear_right,
+        uint8_t tirePressurePsi_front);
 
     bool RRU_setParam(
         uint16_t distance,
@@ -468,6 +511,9 @@ public:
         uint8_t sw_minor,
         uint8_t hw_major,
         uint8_t hw_minor);
+#endif
+#ifdef node_Lock
+    bool Lock_period(uint8_t LockStatus);
 #endif
 };
 

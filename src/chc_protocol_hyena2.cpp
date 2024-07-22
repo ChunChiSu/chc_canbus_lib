@@ -23,7 +23,8 @@ CHC_PROTOCOL_HYENA2::CHC_PROTOCOL_HYENA2()
 }
 CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 {
-    // ----------------- 以下為檢查連線狀態 -----------------
+// ----------------- 以下為檢查連線狀態 -----------------
+#ifdef bike_hyena
     for (int i = 0; i < CHC_PROTOCOL_HYENA2::_EC_COUNT; i++) {
         if ((millis() - sDeviceConnected[i].lLastTime) > 3000) {
             u_bike[i].components.sBasic.u8Connected = 0x00;
@@ -31,6 +32,7 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
             CHC_PL_LOG_I("Device %d disconnected", i);
         }
     }
+#endif
     // ----------------- 以下為接收資料 -----------------
     if (CAN_base_receive(&rx_msg, 70) == false) {
         return NONE;
@@ -48,22 +50,29 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #endif
     CHC_PL_LOG_S("\n");
     // ----------------- 以下為檢查連線狀態 -----------------
+#ifdef CAN_lib_2
     switch (rx_msg.MsgID) {
+#else
+    switch (rx_msg.identifier) {
+#endif
     case CHC_PROTOCOL_HYENA2::ToolControl00: // 0x200
         break;
         //
     case CHC_PROTOCOL_HYENA2::eLockInfo: // 0x633
-
+#ifdef bike_hyena
         u_bike[EC_E_LOCK].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_E_LOCK].lLastTime = millis();
+#endif
         break;
         //
     case CHC_PROTOCOL_HYENA2::BikeControl00: // 0x300
     case CHC_PROTOCOL_HYENA2::HMIModuleIDBroadcasting: // 0x14001
     case CHC_PROTOCOL_HYENA2::HMIModuleIDBroadcastingRequest: // 0x14001
     case CHC_PROTOCOL_HYENA2::HMIErrorInfo: // 0x329
+#ifdef bike_hyena
         u_bike[EC_HMI].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_HMI].lLastTime = millis();
+#endif
         break;
         //
     case CHC_PROTOCOL_HYENA2::ControllerModuleIDBroadcasting: // 0x13000
@@ -72,31 +81,39 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
     case CHC_PROTOCOL_HYENA2::ControllerInfo02: // 0x202
     case CHC_PROTOCOL_HYENA2::ControllerInfo03: // 0x203
     case CHC_PROTOCOL_HYENA2::ControllerErrorInfo: // 0x209
+#ifdef bike_hyena
         u_bike[EC_CONTROLLER].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_CONTROLLER].lLastTime = millis();
+#endif
         break;
 
         //
     case CHC_PROTOCOL_HYENA2::DerailleurModuleIDBroadcasting: // 0x1F000
     case CHC_PROTOCOL_HYENA2::DerailleurModuleIDBroadcastingRequest: // 0x1F000
     case CHC_PROTOCOL_HYENA2::DerailleurState: // 0x650
+#ifdef bike_hyena
         u_bike[EC_DERAILLEUR].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_DERAILLEUR].lLastTime = millis();
+#endif
         break;
         //
     case CHC_PROTOCOL_HYENA2::DropperModuleIDBroadcasting: // 0x1B000
     case CHC_PROTOCOL_HYENA2::DropperModuleIDBroadcastingRequest: // 0x1B000
     case CHC_PROTOCOL_HYENA2::DropperErrorInfo: // 0x559
+#ifdef bike_hyena
         u_bike[EC_DROPPER].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_DROPPER].lLastTime = millis();
+#endif
         break;
         //
     case CHC_PROTOCOL_HYENA2::ForkModuleIDBroadcasting: // 0x13500
     case CHC_PROTOCOL_HYENA2::ForkModuleIDBroadcastingRequest: // 0x13500
     case CHC_PROTOCOL_HYENA2::ForkInfo01: // 0x751
     case CHC_PROTOCOL_HYENA2::ForkErrorInfo: // 0x759
+#ifdef bike_hyena
         u_bike[EC_FORK].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_FORK].lLastTime = millis();
+#endif
         break;
         //
     case CHC_PROTOCOL_HYENA2::RadarUpdateFW: // = 0x190,
@@ -109,8 +126,10 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
     case CHC_PROTOCOL_HYENA2::RadarParameterReadResponse: //  = 0x70001,
     case CHC_PROTOCOL_HYENA2::RadarParameterWrite: //  = 0x70002,
     case CHC_PROTOCOL_HYENA2::RadarParameterWriteResponse: //  = 0x70003        break;
+#ifdef bike_hyena
         u_bike[EC_RADAR].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_RADAR].lLastTime = millis();
+#endif
         break;
         //
     case CHC_PROTOCOL_HYENA2::Battery1ModuleIDBroadcasting: // 0x11000
@@ -118,8 +137,10 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
     case CHC_PROTOCOL_HYENA2::Battery1Info01: // 0x401
     case CHC_PROTOCOL_HYENA2::Battery1Info02: // 0x402
     case CHC_PROTOCOL_HYENA2::Battery1Info06: // 0x406
+#ifdef bike_hyena
         u_bike[EC_BATTERY].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_BATTERY].lLastTime = millis();
+#endif
         break;
         //
     case CHC_PROTOCOL_HYENA2::Battery2ModuleIDBroadcasting: // 0x11000
@@ -127,14 +148,18 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
     case CHC_PROTOCOL_HYENA2::Battery2Info01: // 0x451
     case CHC_PROTOCOL_HYENA2::Battery2Info02: // 0x452
     case CHC_PROTOCOL_HYENA2::Battery2Info06: // 0x456
+#ifdef bike_hyena
         u_bike[EC_BATTERY2].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_BATTERY2].lLastTime = millis();
+#endif
         break;
     case CHC_PROTOCOL_HYENA2::ChargerModuleIDBroadcasting: // 0x12000
     case CHC_PROTOCOL_HYENA2::ChargerModuleIDBroadcastingRequest: // 0x12000
     case CHC_PROTOCOL_HYENA2::ChargerErrorInfo:
+#ifdef bike_hyena
         u_bike[EC_CHARGER].components.sBasic.u8Connected = 0x01;
         sDeviceConnected[EC_CHARGER].lLastTime = millis();
+#endif
         break;
     default:
         break;
@@ -149,6 +174,8 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #ifdef rx_HMIModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::HMIModuleIDBroadcasting: // 0x14000
         for (uint8_t i = 0; i < 8; i++) {
+
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             //     u_bike_info.components.sHmi.bytes[i] = rx_msg.data.u8[i];
             u_bike[EC_HMI].components.sHmi.uInfo.bytes[i] = rx_msg.data.u8[i];
@@ -156,11 +183,13 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
             //     u_bike_info.contents.u_hmi_info.bytes[i] = rx_msg.data[i];
             u_bike[EC_HMI].components.sHmi.uInfo.bytes[i] = rx_msg.data[i];
 #endif
+#endif
         }
         break;
 #endif
 #ifdef rx_HMIErrorInfo
     case CHC_PROTOCOL_HYENA2::HMIErrorInfo: // 0x329
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                             // u_bike_info.components.sHmi.contents.errorCode = rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
         u_bike[EC_HMI].components.sHmi.u16ErrorCode = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
@@ -168,9 +197,11 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
                                             // u_bike_info.contents.u_hmi_info.contents.errorCode = rx_msg.data[0] | rx_msg.data[1] << 8;
         u_bike[EC_HMI].components.sHmi.u16ErrorCode = (uint16_t)rx_msg.data[0] | rx_msg.data[1] << 8;
 #endif
+#endif
         break;
 #endif
     case CHC_PROTOCOL_HYENA2::BikeControl00: // 0x300
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_CONTROLLER].components.sController.assistLevel = rx_msg.data.u8[0];
         Serial.println(u_bike[EC_CONTROLLER].components.sController.assistLevel);
@@ -178,30 +209,35 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #else
         u_bike[EC_CONTROLLER].components.sController.assistLevel = rx_msg.data[0];
 #endif
-
+#endif
         break;
 // ----------------------------------------------------------------
 // Derailleur ID --------------------------------
 #ifdef rx_derailleurModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::DerailleurModuleIDBroadcasting: // 0x1F000
+#ifdef bike_hyena
         for (uint8_t i = 0; i < 8; i++) {
+
 #ifdef CAN_lib_2
             u_bike[EC_DERAILLEUR].components.sDerailleur.uInfo.bytes[i] = rx_msg.data.u8[i];
 #else
             //     u_bike_info.contents.s_derailleur_info.u_derailleur_basic_info.bytes[i] = rx_msg.data[i];
             u_bike[EC_DERAILLEUR].components.sDerailleur.uInfo.bytes[i] = rx_msg.data[i];
 #endif
+#endif
         }
         break;
 #endif
 #ifdef rx_derailleurState
     case CHC_PROTOCOL_HYENA2::DerailleurState: // 0x650
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_DERAILLEUR].components.sDerailleur.gearIndex = rx_msg.data.u8[0];
         u_bike[EC_DERAILLEUR].components.sDerailleur.u16ErrorCode = (uint16_t)rx_msg.data.u8[1];
 #else
         u_bike[EC_DERAILLEUR].components.sDerailleur.gearIndex = rx_msg.data[0];
         u_bike[EC_DERAILLEUR].components.sDerailleur.u16ErrorCode = (uint16_t)rx_msg.data[1];
+#endif
 #endif
         break;
 #endif
@@ -210,33 +246,41 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #ifdef rx_forkModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::ForkModuleIDBroadcasting: // 0x13500
         for (uint8_t i = 0; i < 8; i++) {
+
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             u_bike[EC_FORK].components.sFork.uInfo.bytes[i] = rx_msg.data.u8[i];
 #else
             //     u_bike_info.contents.s_fork_info.u_fork_basic_info.bytes[i] = rx_msg.data[i];
             u_bike[EC_FORK].components.sFork.uInfo.bytes[i] = rx_msg.data[i];
 #endif
+#endif
         }
         break;
 #endif
 #ifdef rx_forkInfo01
     case CHC_PROTOCOL_HYENA2::ForkInfo01: // 0x751
+                                          //
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_FORK].components.sFork.suspensionLevel = rx_msg.data.u8[2];
 #else
-                                          // u_bike_info.contents.s_fork_info.suspensionLevel = rx_msg.data[0];
+        // u_bike_info.contents.s_fork_info.suspensionLevel = rx_msg.data[0];
         u_bike[EC_FORK].components.sFork.suspensionLevel = rx_msg.data[2];
+#endif
 #endif
         break;
 #endif
 #ifdef rx_forkErrorInfo
     case CHC_PROTOCOL_HYENA2::ForkErrorInfo: // 0x759
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                              // u_bike_info.components.sFork.uInfo.contents.errorCode = rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
         u_bike[EC_FORK].components.sFork.u16ErrorCode = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
 #else
                                              // u_bike_info.contents.s_fork_info.u_fork_basic_info.contents.errorCode = rx_msg.data[0] | rx_msg.data[1] << 8;
         u_bike[EC_FORK].components.sFork.u16ErrorCode = (uint16_t)rx_msg.data[0] | rx_msg.data[1] << 8;
+#endif
 #endif
         break;
 #endif
@@ -246,17 +290,20 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
     case CHC_PROTOCOL_HYENA2::ControllerModuleIDBroadcasting: // 0x13000
         for (uint8_t i = 0; i < 8; i++) {
 
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             u_bike[EC_CONTROLLER].components.sController.uInfo.bytes[i] = rx_msg.data.u8[i];
 #else
             //     u_bike_info.contents.s_controller_info.u_controller_basic_info.bytes[i] = rx_msg.data[i];
             u_bike[EC_CONTROLLER].components.sController.uInfo.bytes[i] = rx_msg.data[i];
 #endif
+#endif
         }
         break;
 #endif
 #ifdef rx_controllerInfo01
     case CHC_PROTOCOL_HYENA2::ControllerInfo01: // 0x201
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_CONTROLLER].components.sController.bikeSpeed = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
         u_bike[EC_CONTROLLER].components.sController.torque = (uint16_t)rx_msg.data.u8[2] | rx_msg.data.u8[3] << 8;
@@ -274,20 +321,24 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         u_bike_info.contents.s_controller_info.assistLevel = (rx_msg.data[4] >> 7) & 0x01;
  */
 #endif
+#endif
         break;
 #endif
 #ifdef rx_controllerInfo02
     case CHC_PROTOCOL_HYENA2::ControllerInfo02: // 0x202
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_CONTROLLER].components.sController.odo = (uint32_t)rx_msg.data.u8[4] | rx_msg.data.u8[5] << 8 | rx_msg.data.u8[6] << 16 | rx_msg.data.u8[7] << 24;
 #else
                                                 // u_bike_info.contents.s_controller_info.odo = rx_msg.data[4] | rx_msg.data[5] << 8 | rx_msg.data[6] << 16 | rx_msg.data[7] << 24;
         u_bike[EC_CONTROLLER].components.sController.odo = (uint32_t)rx_msg.data[4] | rx_msg.data[5] << 8 | rx_msg.data[6] << 16 | rx_msg.data[7] << 24;
 #endif
+#endif
         break;
 #endif
 #ifdef rx_controllerInfo03
     case CHC_PROTOCOL_HYENA2::ControllerInfo03: // 0x203
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_CONTROLLER].components.sController.cadence = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
         u_bike[EC_CONTROLLER].components.sController.estimatedRange = (uint16_t)rx_msg.data.u8[6] | (rx_msg.data.u8[7] & 0x0F) << 8;
@@ -298,10 +349,12 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         u_bike[EC_CONTROLLER].components.sController.estimatedRange = (uint16_t)rx_msg.data[6] | (rx_msg.data[7] & 0x0F) << 8;
 
 #endif
+#endif
         break;
 #endif
 #ifdef rx_controllerErrorInfo
     case CHC_PROTOCOL_HYENA2::ControllerErrorInfo: // 0x209
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                                    // u_bike_info.components.sController.uInfo.contents.errorCode = rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
         u_bike[EC_CONTROLLER].components.sController.u16ErrorCode = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
@@ -309,18 +362,22 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
                                                    // u_bike_info.contents.s_controller_info.u_controller_basic_info.contents.errorCode = rx_msg.data[0] | rx_msg.data[1] << 8;
         u_bike[EC_CONTROLLER].components.sController.u16ErrorCode = (uint16_t)rx_msg.data[0] | rx_msg.data[1] << 8;
 #endif
+#endif
         break;
 #endif
 // ----------------------------------------------------------------
 // eLock ID --------------------------------
 #ifdef rx_elockInfo
     case CHC_PROTOCOL_HYENA2::eLockInfo: // 0x633
+
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                          // u_bike_info.components.sELock.elockStatus = rx_msg.data.u8[2];
         u_bike[EC_E_LOCK].components.sELock.u8Status = rx_msg.data.u8[2];
 #else
                                          // u_bike_info.contents.s_elock_info.elockStatus = rx_msg.data[2];
         u_bike[EC_E_LOCK].components.sELock.u8Status = rx_msg.data[2];
+#endif
 #endif
         break;
 #endif
@@ -329,6 +386,7 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #ifdef rx_dropperModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::DropperModuleIDBroadcasting: // 0x1B000
         for (uint8_t i = 0; i < 8; i++) {
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             //     u_bike_info.components.sDropper.bytes[i] = rx_msg.data.u8[i];
             u_bike[EC_DROPPER].components.sDropper.uInfo.bytes[i] = rx_msg.data.u8[i];
@@ -336,17 +394,20 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
             //     u_bike_info.contents.u_dropper_info.bytes[i] = rx_msg.data[i];
             u_bike[EC_DROPPER].components.sDropper.uInfo.bytes[i] = rx_msg.data[i];
 #endif
+#endif
         }
         break;
 #endif
 #ifdef rx_dropperErrorInfo
     case CHC_PROTOCOL_HYENA2::DropperErrorInfo: // 0x559
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                                 // u_bike_info.components.sDropper.contents.errorCode = rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
         u_bike[EC_DROPPER].components.sDropper.u16ErrorCode = (uint16_t)rx_msg.data.u8[0] | rx_msg.data.u8[1] << 8;
 #else
                                                 // u_bike_info.contents.u_dropper_info.contents.errorCode = rx_msg.data[0] | rx_msg.data[1] << 8;
         u_bike[EC_DROPPER].components.sDropper.u16ErrorCode = (uint16_t)rx_msg.data[0] | rx_msg.data[1] << 8;
+#endif
 #endif
         break;
 #endif
@@ -355,17 +416,20 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #ifdef rx_battery1ModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::Battery1ModuleIDBroadcasting: // 0x11000
         for (uint8_t i = 0; i < 8; i++) {
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             u_bike[EC_BATTERY].components.sBattery1.uInfo.bytes[i] = rx_msg.data.u8[i];
 #else
             //     u_bike_info.contents.s_battery1_info.u_battery_basic_info.bytes[i] = rx_msg.data[i];
             u_bike[EC_BATTERY].components.sBattery1.uInfo.bytes[i] = rx_msg.data[i];
 #endif
+#endif
         }
         break;
 #endif
 #ifdef rx_battery1Info01
     case CHC_PROTOCOL_HYENA2::Battery1Info01: // 0x401
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_BATTERY].components.sBattery1.u32Voltage = (uint32_t)rx_msg.data.u8[0] | (uint32_t)rx_msg.data.u8[1] << 8 | (uint32_t)rx_msg.data.u8[2] << 16 | (uint32_t)rx_msg.data.u8[3] << 24;
         u_bike[EC_BATTERY].components.sBattery1.i32Current = (int32_t)rx_msg.data.u8[4] | (int32_t)rx_msg.data.u8[5] << 8 | (int32_t)rx_msg.data.u8[6] << 16 | (int32_t)rx_msg.data.u8[7] << 24;
@@ -376,20 +440,24 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         // u_bike_info.contents.s_battery1_info.voltage = (uint32_t)rx_msg.data[0] | (uint32_t)rx_msg.data[1] << 8 | (uint32_t)rx_msg.data[2] << 16 | (uint32_t)rx_msg.data[3] << 24;
         // u_bike_info.contents.s_battery1_info.current = (int32_t)rx_msg.data[4] | (int32_t)rx_msg.data[5] << 8 | (int32_t)rx_msg.data[6] << 16 | (int32_t)rx_msg.data[7] << 24;
 #endif
+#endif
         break;
 #endif
 #ifdef rx_battery1Info02
     case CHC_PROTOCOL_HYENA2::Battery1Info02: // 0x402
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_BATTERY].components.sBattery1.batteryPercent = (uint32_t)rx_msg.data.u8[0];
 #else
                                               // u_bike_info.contents.s_battery1_info.batteryPercent = (uint32_t)rx_msg.data[0];
         u_bike[EC_BATTERY].components.sBattery1.batteryPercent = (uint32_t)rx_msg.data[0];
 #endif
+#endif
         break;
 #endif
 #ifdef rx_battery1Info06
     case CHC_PROTOCOL_HYENA2::Battery1Info06: // 0x406
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_BATTERY].components.sBattery1.temperature1 = (int8_t)rx_msg.data.u8[0];
         u_bike[EC_BATTERY].components.sBattery1.temperature2 = (int8_t)rx_msg.data.u8[1];
@@ -419,11 +487,13 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         u_bike_info.contents.s_battery1_info.temperature8 = (int8_t)rx_msg.data[7];
  */
 #endif
+#endif
         break;
 #endif
 #ifdef rx_battery2ModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::Battery2ModuleIDBroadcasting: // 0x11000
         for (uint8_t i = 0; i < 8; i++) {
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             //     u_bike_info.components.s_battery2_info.uInfo.bytes[i] = rx_msg.data.u8[i];
             u_bike[EC_BATTERY2].components.sBattery2.uInfo.bytes[i] = rx_msg.data.u8[i];
@@ -431,11 +501,13 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
             //     u_bike_info.contents.s_battery2_info.u_battery_basic_info.bytes[i] = rx_msg.data[i];
             u_bike[EC_BATTERY2].components.sBattery2.uInfo.bytes[i] = rx_msg.data[i];
 #endif
+#endif
         }
         break;
 #endif
 #ifdef rx_battery2Info01
     case CHC_PROTOCOL_HYENA2::Battery2Info01: // 0x451
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                               // u_bike_info.components.s_battery2_info.voltage = (uint32_t)rx_msg.data.u8[0] | (uint32_t)rx_msg.data.u8[1] << 8 | (uint32_t)rx_msg.data.u8[2] << 16 | (uint32_t)rx_msg.data.u8[3] << 24;
         u_bike[EC_BATTERY2].components.sBattery2.u32Voltage = (uint32_t)rx_msg.data.u8[0] | (uint32_t)rx_msg.data.u8[1] << 8 | (uint32_t)rx_msg.data.u8[2] << 16 | (uint32_t)rx_msg.data.u8[3] << 24;
@@ -448,10 +520,12 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         // u_bike_info.contents.s_battery2_info.voltage = (uint32_t)rx_msg.data[0] | (uint32_t)rx_msg.data[1] << 8 | (uint32_t)rx_msg.data[2] << 16 | (uint32_t)rx_msg.data[3] << 24;
         // u_bike_info.contents.s_battery2_info.current = (int32_t)rx_msg.data[4] | (int32_t)rx_msg.data[5] << 8 | (int32_t)rx_msg.data[6] << 16 | (int32_t)rx_msg.data[7] << 24;
 #endif
+#endif
         break;
 #endif
 #ifdef rx_battery2Info02
     case CHC_PROTOCOL_HYENA2::Battery2Info02: // 0x452
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                               // u_bike_info.components.s_battery2_info.batteryPercent = (uint32_t)rx_msg.data.u8[0];
         u_bike[EC_BATTERY2].components.sBattery2.batteryPercent = (uint32_t)rx_msg.data.u8[0];
@@ -459,11 +533,13 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
                                               // u_bike_info.contents.s_battery2_info.batteryPercent = (uint32_t)rx_msg.data[0];
         u_bike[EC_BATTERY2].components.sBattery2.batteryPercent = (uint32_t)rx_msg.data[0];
 #endif
+#endif
         break;
 #endif
 #ifdef rx_battery2Info06
     case CHC_PROTOCOL_HYENA2::Battery2Info06: // 0x456
 
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_BATTERY2].components.sBattery2.temperature1 = (int8_t)rx_msg.data.u8[0];
         u_bike[EC_BATTERY2].components.sBattery2.temperature2 = (int8_t)rx_msg.data.u8[1];
@@ -503,6 +579,7 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         u_bike_info.contents.s_battery2_info.temperature8 = (int8_t)rx_msg.data[7];
  */
 #endif
+#endif
         break;
 #endif
         // ----------------------------------------------------------------
@@ -524,8 +601,8 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
         this->operatingTime = rx_msg.data.u8[0];
         this->SME = rx_msg.data.u8[1];
 #else
-        this->operatingTime = rx_msg.data[0];
-        this->SME = rx_msg.data[1];
+    this->operatingTime = rx_msg.data[0];
+    this->SME = rx_msg.data[1];
 #endif
         return GET_TOOL_CTRL;
         break;
@@ -544,12 +621,14 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #ifdef rx_radarErrorInfo
     case CHC_PROTOCOL_HYENA2::RadarErrorInfo: // = 0x709,
 // sData.dtc.RRU = rx_msg.data[0];
+#ifdef bike_hyena
 #ifdef CAN_lib_2
                                               // u_bike_info.components.sRadar.contents.errorCode = rx_msg.data.u8[0] | (rx_msg.data.u8[1] << 8);
         u_bike[EC_RADAR].components.sRadar.u16ErrorCode = (uint16_t)rx_msg.data.u8[0] | (rx_msg.data.u8[1] << 8);
 #else
                                               // u_bike_info.contents.u_radar_info.contents.errorCode = rx_msg.data[0] | (rx_msg.data[1] << 8);
         u_bike[EC_RADAR].components.sRadar.u16ErrorCode = (uint16_t)rx_msg.data[0] | (rx_msg.data[1] << 8);
+#endif
 #endif
         // return PROCESS_DONE;
         // return GET_RRU;
@@ -559,10 +638,12 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #ifdef rx_radarModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::RadarModuleIDBroadcast:
         for (uint8_t i = 0; i < 8; i++) {
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             u_bike[EC_RADAR].components.sRadar.uInfo.bytes[i] = rx_msg.data.u8[i];
 #else
             u_bike[EC_RADAR].components.sRadar.uInfo.bytes[0] = rx_msg.data[0];
+#endif
 #endif
         }
         break;
@@ -571,10 +652,12 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 #ifdef rx_chargerModuleIDBroadcasting
     case CHC_PROTOCOL_HYENA2::ChargerModuleIDBroadcasting: // 0x12000
         for (uint8_t i = 0; i < 8; i++) {
+#ifdef bike_hyena
 #ifdef CAN_lib_2
             u_bike[EC_CHARGER].components.sCharger.uInfo.bytes[i] = rx_msg.data.u8[i];
 #else
             u_bike[EC_CHARGER].components.sCharger.uInfo.bytes[i] = rx_msg.data[i];
+#endif
 #endif
         }
         break;
@@ -582,10 +665,12 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 
 #ifdef rx_chargerErrorInfo
     case CHC_PROTOCOL_HYENA2::ChargerErrorInfo: // 0x809
+#ifdef bike_hyena
 #ifdef CAN_lib_2
         u_bike[EC_CHARGER].components.sCharger.u16ErrorCode = (uint16_t)rx_msg.data.u8[0] | (rx_msg.data.u8[1] << 8);
 #else
         u_bike[EC_CHARGER].components.sCharger.u16ErrorCode = (uint16_t)rx_msg.data[0] | (rx_msg.data[1] << 8);
+#endif
 #endif
         break;
 #endif

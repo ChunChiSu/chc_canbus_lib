@@ -488,7 +488,9 @@ public:
         // uint8_t u8Connected;
         long lLastTime;
     } S_COMPONENT_CONNECTED;
+#ifdef bike_hyena
     S_COMPONENT_CONNECTED sDeviceConnected[_EC_COUNT];
+#endif
     // typedef struct
     // {
     //     uint8_t HMI[6];

@@ -23,19 +23,20 @@ bool CAN_base_init(int pinCanRx, int pinCanTx, long baudrate)
 #ifdef CAN_lib_1
     twai_stop();
     twai_driver_uninstall();
+    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_250KBITS();
     twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(
         (gpio_num_t)pinCanTx,
         (gpio_num_t)pinCanRx,
         TWAI_MODE_NORMAL); // TWAI_MODE_NORMAL, TWAI_MODE_NO_ACK or TWAI_MODE_LISTEN_ONLY
+                           //
     switch (baudrate) {
     case 125000:
         break;
     case 250000:
-        twai_timing_config_t t_config = TWAI_TIMING_CONFIG_250KBITS();
+        t_config = TWAI_TIMING_CONFIG_250KBITS();
         break;
     case 500000:
-        twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
-
+        t_config = TWAI_TIMING_CONFIG_500KBITS();
         break;
     default:
         break;

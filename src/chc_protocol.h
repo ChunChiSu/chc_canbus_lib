@@ -236,10 +236,17 @@ public:
         RRU_PARAM_W_REQ = 0x70002,
         RRU_PARAM_W_RES = 0x70003,
 
+        // TPMS ID
+        TPMS_DIAG = 0x170,
+        TPMS_ID1 = 0x180,
+        TPMS_V = 0x18F,
+
+        // RRU ID
         RRU_DIAG = 0x190,
         RRU_ID1 = 0x1A0,
         RRU_ID2 = 0x1A1,
-        RRU_V = 0x1AF,        
+        RRU_V = 0x1AF,
+
         // CWS ID
         CWS_DIAG = 0x1B0,
         CWS_ID1 = 0x1C0,

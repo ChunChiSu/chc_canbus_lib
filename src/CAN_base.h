@@ -4,7 +4,7 @@
 #ifdef CAN_lib_2
 #include <ESP32CAN.h>
 #endif
-#define DEBUG_CAN_LEVEL 0 
+#define DEBUG_CAN_LEVEL 1 
 #define DEBUG_CAN_SERIAL Serial
 
 #if DEBUG_CAN_LEVEL >= 1

@@ -44,6 +44,35 @@
 #define rx_chargerErrorInfo
 
 #endif
+#ifdef node_HMI
+// #define rx_HMIModuleIDBroadcasting
+// #define rx_HMIErrorInfo
+#define rx_derailleurModuleIDBroadcasting
+#define rx_derailleurState
+#define rx_controllerModuleIDBroadcasting
+#define rx_controllerInfo01
+#define rx_controllerInfo02
+#define rx_controllerInfo03
+#define rx_controllerErrorInfo
+#define rx_battery1ModuleIDBroadcasting
+#define rx_battery1Info01
+#define rx_battery1Info02
+#define rx_battery1Info06
+#define rx_battery2ModuleIDBroadcasting
+#define rx_battery2Info01
+#define rx_battery2Info02
+#define rx_battery2Info06
+#define rx_dropperModuleIDBroadcasting
+#define rx_dropperErrorInfo
+#define rx_forkModuleIDBroadcasting
+#define rx_forkInfo01
+#define rx_forkErrorInfo
+#define rx_radarModuleIDBroadcasting
+#define rx_radarErrorInfo
+#define rx_chargerModuleIDBroadcasting
+#define rx_chargerErrorInfo
+
+#endif
 // ----------------------------------------------------------------
 
 // #define vCompanyId 1 // 2
@@ -55,7 +84,7 @@
 #define hw_Major 1
 #define hw_Minor 0
 
-#define DEBUG_CHC_PL_LEVEL 4
+#define DEBUG_CHC_PL_LEVEL 1 
 #define DEBUG_CHC_PL_SERIAL Serial
 #if DEBUG_CHC_PL_LEVEL >= 1
 
@@ -200,6 +229,114 @@ public:
         uint8_t bytes[3];
     } U_PARAM_VERSION;
 
+    typedef struct {
+        uint8_t assistLevel;
+        uint8_t walkAssist;
+        uint8_t lightRequest;
+        uint8_t powerControl;
+
+        uint8_t profileScale : 7;
+        uint8_t resetRangeEstimation : 1;
+
+        uint8_t gearShift : 5;
+        uint8_t gearShiftUpDown : 2;
+        uint8_t reduceMotorPower : 1;
+
+        uint8_t currentScale : 7;
+        uint8_t targetSupplier : 1;
+
+        uint8_t messageCounter : 4;
+        uint8_t dropperValue : 1;
+        uint8_t forkSuspensionLevel : 2;
+        uint8_t forkAutoSuspension : 1;
+
+    } S_BIKE_CONTROL_00;
+    typedef union {
+        S_BIKE_CONTROL_00 contents;
+        uint8_t bytes[sizeof(S_BIKE_CONTROL_00)];
+    } U_BIKE_CONTROL_00;
+    U_BIKE_CONTROL_00 uBikeControl00 = {
+        .contents = {
+            .assistLevel = 0,
+            .walkAssist = 0,
+            .lightRequest = 0,
+            .powerControl = 0,
+            .profileScale = 0,
+            .resetRangeEstimation = 0,
+            .gearShift = 0,
+            .gearShiftUpDown = 1,
+            .reduceMotorPower = 0,
+            .currentScale = 0,
+            .targetSupplier = 0,
+            .messageCounter = 0,
+            .dropperValue = 0,
+            .forkSuspensionLevel = 0,
+            .forkAutoSuspension = 0 }
+    };
+    static const long cycleTime_bikeControl00 = 100;
+    bool bikeControl00(CHC_PROTOCOL_HYENA2::U_BIKE_CONTROL_00 ufBikeControl00);
+
+    // ? ----------------------------------------------------------------
+    typedef struct {
+        uint8_t bluetoothConnected : 1;
+        uint8_t phoneConnected : 1;
+        uint8_t usbPutIn : 1;
+        uint8_t unit : 1;
+
+        uint8_t frontDerailleurConnected : 1;
+        uint8_t rearDerailleurConnected : 1;
+        uint8_t reserved : 2;
+    } S_BIKE_STATUS;
+    typedef union {
+        S_BIKE_STATUS contents;
+        uint8_t bytes[sizeof(S_BIKE_STATUS)];
+    } U_BIKE_STATUS;
+    U_BIKE_STATUS uBikeStatus = {
+        .contents = {
+            .bluetoothConnected = 0,
+            .phoneConnected = 0,
+            .usbPutIn = 0,
+            .unit = 0,
+            .frontDerailleurConnected = 0,
+            .rearDerailleurConnected = 0,
+            .reserved = 0 }
+    };
+    static const long cycleTime_bikeStatus = 100;
+    bool bikeStatus(CHC_PROTOCOL_HYENA2::U_BIKE_STATUS ufBikeStatus);
+
+    // ? ----------------------------------------------------------------
+    typedef struct {
+        uint8_t moduleID[8];
+    } S_HMI_MODULE_ID_BROADCASTING;
+    typedef union {
+        S_HMI_MODULE_ID_BROADCASTING contents;
+        uint8_t bytes[sizeof(S_HMI_MODULE_ID_BROADCASTING)];
+    } U_HMI_MODULE_ID_BROADCASTING;
+    U_HMI_MODULE_ID_BROADCASTING uHmiModuleIdBroadcasting = {
+        .contents = {
+            .moduleID = { 0, 0, 0, 0, 0, 0, 0, 0 } }
+    };
+    static const long cycleTime_hmiModuleIdBroadcasting = 1000;
+    bool hmiModuleIDBroadcasting(CHC_PROTOCOL_HYENA2::U_HMI_MODULE_ID_BROADCASTING ufHmiModuleIdBroadcasting);
+
+    // ? ----------------------------------------------------------------
+    typedef struct {
+        uint8_t infoPageNum;
+        uint8_t error[7];
+    } S_HMI_ERROR_INFO;
+    typedef union {
+        S_HMI_ERROR_INFO contents;
+        uint8_t bytes[sizeof(S_HMI_ERROR_INFO)];
+    } U_HMI_ERROR_INFO;
+    U_HMI_ERROR_INFO uHmiErrorInfo = {
+        .contents = {
+            .infoPageNum = 0,
+            .error = { 0, 0, 0, 0, 0, 0, 0 } }
+    };
+    static const long cycleTime_hmiErrorInfo = 100;
+    bool hmiErrorInfo(CHC_PROTOCOL_HYENA2::U_HMI_ERROR_INFO ufHmiErrorInfo);
+
+    // ? ----------------------------------------------------------------
     typedef struct //__attribute((__packed__))
     {
         uint8_t supported_distance;
@@ -414,6 +551,203 @@ public:
     } U_BIKE_INFO;
     U_BIKE_INFO u_bike[_EC_COUNT];
 #endif
+#ifdef node_HMI
+    typedef enum {
+        EC_CONTROLLER,
+        EC_HMI,
+        EC_RADAR,
+        EC_FORK,
+        EC_IOT,
+        EC_E_LOCK,
+        EC_DROPPER,
+        EC_BATTERY,
+        EC_DERAILLEUR,
+        EC_BATTERY2,
+        EC_CHARGER,
+        _EC_COUNT,
+    } E_COMPONENT;
+    const char* enumComponentName[_EC_COUNT] = {
+        "EC_CONTROLLER",
+        "EC_HMI",
+        "EC_RADAR",
+        "EC_FORK",
+        "EC_IOT",
+        "EC_E_LOCK",
+        "EC_DROPPER",
+        "EC_BATTERY",
+        "EC_DERAILLEUR",
+        "EC_BATTERY2",
+        "EC_CHARGER"
+    };
+    typedef enum {
+        ECI_MANUFACTURER,
+        ECI_PRODUCT,
+        ECI_MODEL,
+        ECI_HW_VER,
+        ECI_SW_VER,
+        ECI_PL_VER,
+        ECI_SN,
+        _ECI_COUNT,
+    } E_COMPONENT_INFO;
+    typedef struct
+    {
+        uint8_t manufacturer;
+        uint8_t model : 4;
+        uint8_t product : 4;
+        uint8_t HWVersion;
+        uint8_t FWVersion;
+        uint8_t protocolVersion;
+        uint8_t SN[3];
+        // uint16_t errorCode;
+    } S_BASIC_INFO;
+
+    typedef union {
+        S_BASIC_INFO C;
+        uint8_t bytes[sizeof(S_BASIC_INFO)];
+    } U_BASIC_INFO;
+
+    /*
+         typedef union {
+            S_BASIC_INFO contents;
+            uint8_t bytes[sizeof(S_BASIC_INFO)];
+        } U_BASIC_INFO;
+    */
+    // typedef struct
+    // {
+    //     S_BASIC_INFO s_radar_basic_info;
+    //     uint16_t errorCode;
+    // }S_RADAR_INFO;
+    typedef struct
+    {
+        // U_BASIC_INFO uInfo;
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+
+        uint16_t bikeSpeed; // 0.01 km/h
+        uint16_t torque;
+        uint8_t lightStatus;
+        uint8_t assistLevel;
+        uint32_t odo; // m
+        uint8_t estimatedRange; // km
+        uint16_t cadence; // 0.025 RPM
+    } S_INFO_CONTROLLER;
+    typedef struct
+    {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+
+        uint8_t key0;
+        uint8_t key1;
+        uint8_t key2;
+        uint8_t astLevel;
+        uint8_t profileScale;
+        uint8_t currenScale;
+    } S_INFO_HMI;
+
+    typedef struct
+    {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+    } S_INFO_RADAR;
+
+    typedef struct
+    {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+        uint8_t suspensionLevel;
+    } S_INFO_FORK;
+
+    typedef struct
+    {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+    } S_INFO_IOT;
+
+    typedef struct {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+
+        uint8_t u8Status;
+    } S_INFO_E_LOCK;
+
+    typedef struct
+    {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+    } S_INFO_DROPPER;
+
+    typedef struct
+    {
+        uint8_t u8Connected;
+        // U_BASIC_INFO uInfo;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+        uint32_t batteryPercent; // %
+        int8_t temperature1; //
+        int8_t temperature2; //
+        int8_t temperature3; //
+        int8_t temperature4; //
+        int8_t temperature5; //
+        int8_t temperature6; //
+        int8_t temperature7; //
+        int8_t temperature8; //
+        uint32_t u32Voltage; // mV
+        int32_t i32Current; // mA
+    } S_INFO_BATTERY;
+
+    typedef struct
+    {
+        uint8_t u8Connected;
+        // U_BASIC_INFO uInfo;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+        uint8_t gearIndex;
+    } S_INFO_DERAILLEUR;
+
+    typedef struct {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint16_t u16ErrorCode;
+    } S_INFO_CHARGER;
+
+    typedef struct {
+        uint8_t u8Connected;
+        U_BASIC_INFO uInfo;
+        uint8_t bytes[sizeof(S_INFO_CONTROLLER) - sizeof(U_BASIC_INFO) - 1];
+    } S_INFO_BASIC_INFO;
+
+    typedef union {
+        S_INFO_CONTROLLER sController;
+        S_INFO_HMI sHmi;
+        S_INFO_RADAR sRadar;
+        S_INFO_FORK sFork;
+        S_INFO_IOT sIot;
+        S_INFO_E_LOCK sELock;
+        S_INFO_DROPPER sDropper;
+        S_INFO_BATTERY sBattery1;
+        S_INFO_DERAILLEUR sDerailleur;
+        S_INFO_BATTERY sBattery2;
+        S_INFO_CHARGER sCharger;
+
+        S_INFO_BASIC_INFO sBasic;
+        // S_BASIC_INFO sBasicInfo;
+        //
+        uint8_t bytes[sizeof(S_INFO_CONTROLLER)];
+    } U_BIKE_COMPONENT_INFO;
+
+    typedef union {
+        U_BIKE_COMPONENT_INFO components;
+        uint8_t bytes[sizeof(U_BIKE_COMPONENT_INFO)];
+    } U_BIKE_INFO;
+    U_BIKE_INFO u_bike[_EC_COUNT];
+#endif
     enum CAN_ID {
         // Battery1 ID
         Battery1ModuleIDBroadcasting = 0x11000,
@@ -433,6 +767,7 @@ public:
         // Console ID
         BikeControl00 = 0x300,
         ToolControl00 = 0x309,
+        BikeStatus = 0x320,
         // elock ID
         eLockInfo = 0x633,
         // Controller ID
@@ -450,6 +785,7 @@ public:
         ForkErrorInfo = 0x759,
 
         // HMI ID
+        HMIAssistLevelControl = 0x30C,
         HMIModuleIDBroadcasting = 0x14000,
         HMIModuleIDBroadcasting_hyena = 0x14002,
         HMIModuleIDBroadcastingRequest = 0x14001,
@@ -632,7 +968,7 @@ public:
         Start,
         Concetutive,
     } RWStatus;
-    // RWStatus rwStatus;
+// RWStatus rwStatus;
 #endif
 
 #ifdef node_NU

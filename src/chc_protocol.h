@@ -224,23 +224,6 @@ public:
         TPMS_ID1 = 0x180,
         TPMS_V = 0x18F,
 
-        // RRU ID        
-        RRU_FW_UPDATE_REQ = 0x190,
-        RRU_FW_UPDATE_RP = 0x191,
-        RRU_MODULE_ID_BROADCAST = 0x19000,
-        RRU_MODULE_ID_READ = 0x19001,
-        RRU_INFO = 0x701,
-        RRU_ERR = 0x709,
-        RRU_PARAM_R_REQ = 0x70000,
-        RRU_PARAM_R_RES = 0x70001,
-        RRU_PARAM_W_REQ = 0x70002,
-        RRU_PARAM_W_RES = 0x70003,
-
-        // TPMS ID
-        TPMS_DIAG = 0x170,
-        TPMS_ID1 = 0x180,
-        TPMS_V = 0x18F,
-
         // RRU ID
         RRU_DIAG = 0x190,
         RRU_ID1 = 0x1A0,

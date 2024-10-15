@@ -290,6 +290,7 @@ CHC_PROTOCOL_HYENA::REQ_type CHC_PROTOCOL_HYENA::rx(void)
         } break;
         // * ----------------------------------
         // * 讀取控制器：電壓狀態
+        // * 
         case OPC_VOL: {
             sData.mcu.voltage = ((int32_t)ulFrame->sVol.VolHH << 24)
                 | ((int32_t)ulFrame->sVol.VolHL << 16)

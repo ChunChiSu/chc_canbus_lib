@@ -69,6 +69,7 @@
 #define rx_forkErrorInfo
 #define rx_radarModuleIDBroadcasting
 #define rx_radarErrorInfo
+#define rx_radarInfo01
 #define rx_chargerModuleIDBroadcasting
 #define rx_chargerErrorInfo
 
@@ -84,7 +85,7 @@
 #define hw_Major 1
 #define hw_Minor 0
 
-#define DEBUG_CHC_PL_LEVEL 1 
+#define DEBUG_CHC_PL_LEVEL 1
 #define DEBUG_CHC_PL_SERIAL Serial
 #if DEBUG_CHC_PL_LEVEL >= 1
 
@@ -625,12 +626,16 @@ public:
         uint16_t u16ErrorCode;
 
         uint16_t bikeSpeed; // 0.01 km/h
-        uint16_t torque;
+        // uint16_t torque; 
+        uint16_t pedalCadence; // 0.25 RPM
+        uint32_t pedalPower; // 0.025 mW
+        uint32_t torque; // 0.025 Nm
         uint8_t lightStatus;
+        uint8_t controllerTemperature; // 0 - 255 C
         uint8_t assistLevel;
         uint32_t odo; // m
         uint8_t estimatedRange; // km
-        uint16_t cadence; // 0.025 RPM
+        // uint16_t cadence; // 0.025 RPM
     } S_INFO_CONTROLLER;
     typedef struct
     {
@@ -651,6 +656,12 @@ public:
         uint8_t u8Connected;
         U_BASIC_INFO uInfo;
         uint16_t u16ErrorCode;
+
+        uint8_t u8ObjectNum;
+        uint16_t u16Speed;
+        uint16_t u16Distance;
+        uint8_t u8Degree;
+        uint8_t u8Status;
     } S_INFO_RADAR;
 
     typedef struct
@@ -666,6 +677,14 @@ public:
         uint8_t u8Connected;
         U_BASIC_INFO uInfo;
         uint16_t u16ErrorCode;
+
+        uint8_t ubStatusNetModule : 1;
+        uint8_t ubStatusNetConnected : 1;
+        uint8_t ubStatusNetMqtt : 1;
+        uint8_t ubStatusGpsFixed : 1;
+        
+        uint8_t reserved : 4;
+
     } S_INFO_IOT;
 
     typedef struct {
@@ -689,6 +708,7 @@ public:
         // U_BASIC_INFO uInfo;
         U_BASIC_INFO uInfo;
         uint16_t u16ErrorCode;
+
         uint32_t batteryPercent; // %
         int8_t temperature1; //
         int8_t temperature2; //
@@ -708,6 +728,7 @@ public:
         // U_BASIC_INFO uInfo;
         U_BASIC_INFO uInfo;
         uint16_t u16ErrorCode;
+
         uint8_t gearIndex;
     } S_INFO_DERAILLEUR;
 

@@ -73,7 +73,16 @@ bool CHC_PROTOCOL_HYENA2::bikeStatus(CHC_PROTOCOL_HYENA2::U_BIKE_STATUS ufBikeSt
     } else
         return true;
 }
-
+bool CHC_PROTOCOL_HYENA2::bikeSetResistance(uint16_t u16ResistancePower)
+{
+    tx_msg.identifier = HMISetResistance;
+    tx_msg.extd = 1;
+    tx_msg.rtr = 0;
+    tx_msg.data_length_code = 2;
+    tx_msg.data[0] = (uint8_t)u16ResistancePower;
+    tx_msg.data[1] = (uint8_t)(u16ResistancePower>>8);
+    return CAN_base_transmit(&tx_msg);
+}
 bool CHC_PROTOCOL_HYENA2::hmiModuleIDBroadcasting(CHC_PROTOCOL_HYENA2::U_HMI_MODULE_ID_BROADCASTING ufHmiModuleIdBroadcasting)
 {
     static long lLastTime = millis();
@@ -466,6 +475,18 @@ CHC_PROTOCOL_HYENA2::REQ_type CHC_PROTOCOL_HYENA2::rx()
 
 #endif
 #endif
+        break;
+#endif
+#ifdef rx_NewControllerInfo01
+    case CHC_PROTOCOL_HYENA2::NewControllerInfo01:
+        u_bike[EC_CONTROLLER].components.sController.bikeSpeed = (uint16_t)rx_msg.data[0] | ((uint16_t)rx_msg.data[1] << 8);
+        break;
+#endif
+#ifdef rx_NewcontrollerInfo03
+    case CHC_PROTOCOL_HYENA2::NewControllerInfo03:
+        u_bike[EC_CONTROLLER].components.sController.pedalCadence= (uint16_t)rx_msg.data[0];
+        u_bike[EC_CONTROLLER].components.sController.torque = (uint32_t)rx_msg.data[1] | ((uint32_t)rx_msg.data[2] << 8);
+        u_bike[EC_CONTROLLER].components.sController.pedalPower = (uint32_t)rx_msg.data[3] | ((uint32_t)rx_msg.data[4] << 8);
         break;
 #endif
 #ifdef rx_controllerErrorInfo

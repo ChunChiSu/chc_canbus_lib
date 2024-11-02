@@ -53,6 +53,8 @@
 #define rx_controllerInfo01
 #define rx_controllerInfo02
 #define rx_controllerInfo03
+#define rx_NewControllerInfo01
+#define rx_NewcontrollerInfo03
 #define rx_controllerErrorInfo
 #define rx_battery1ModuleIDBroadcasting
 #define rx_battery1Info01
@@ -304,7 +306,11 @@ public:
     };
     static const long cycleTime_bikeStatus = 100;
     bool bikeStatus(CHC_PROTOCOL_HYENA2::U_BIKE_STATUS ufBikeStatus);
-
+    // ? ----------------------------------------------------------------
+    // typedef struct {
+    //     float resistance;
+    // }S_BIKE_RESISTANCE;
+    bool bikeSetResistance(uint16_t u16ResistancePower);
     // ? ----------------------------------------------------------------
     typedef struct {
         uint8_t moduleID[8];
@@ -798,7 +804,8 @@ public:
         ControllerInfo02 = 0x202,
         ControllerInfo03 = 0x203,
         ControllerErrorInfo = 0x209,
-
+        NewControllerInfo01 = 0x1e942042,
+        NewControllerInfo03 = 0x1e94204e,
         // Fork ID
         ForkModuleIDBroadcasting = 0x13500,
         ForkModuleIDBroadcastingRequest = 0x13501,
@@ -810,7 +817,8 @@ public:
         HMIModuleIDBroadcasting = 0x14000,
         HMIModuleIDBroadcasting_hyena = 0x14002,
         HMIModuleIDBroadcastingRequest = 0x14001,
-
+        HMISetAssisLevel = 0x2940015,
+        HMISetResistance = 0x2940031,
         HMIErrorInfo = 0x329,
 
         // Charger ID

@@ -310,7 +310,7 @@ public:
     // typedef struct {
     //     float resistance;
     // }S_BIKE_RESISTANCE;
-    bool bikeSetResistance(uint16_t u16ResistancePower);
+    bool bikeSetResistance(int16_t i16ResistancePower);
     // ? ----------------------------------------------------------------
     typedef struct {
         uint8_t moduleID[8];
